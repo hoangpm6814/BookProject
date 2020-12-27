@@ -8,30 +8,37 @@ namespace BookProject.Services
 {
     public class CountryRepository : ICountryRepository
     {
-        private BookDbContext _bookDbContext;
+        private BookDbContext _countryContext;
 
-        public CountryRepository(BookDbContext bookDbContext)
+        public CountryRepository(BookDbContext countryContext)
         {
-            _bookDbContext = bookDbContext;
+            _countryContext = countryContext;
         }
+
+        public bool CountryExists(int countryId)
+        {
+            return _countryContext.Countries.Any(c => c.Id == countryId);
+        }
+
         public ICollection<Author> GetAuthorsFromACountry(int countryId)
         {
-            throw new NotImplementedException();
+            return _countryContext.Authors.Where(a => a.Country.Id == countryId).ToList();
         }
 
         public ICollection<Country> GetCountries()
         {
-            return _bookDbContext.Countries.OrderBy(c => c.Name).ToList();
+            return _countryContext.Countries.OrderBy(c => c.Name).ToList();
         }
 
         public Country GetCountry(int countryId)
         {
-            return _bookDbContext.Countries.Where(c => c.Id == countryId).FirstOrDefault();
+            return _countryContext.Countries.Where(c => c.Id == countryId).FirstOrDefault();
         }
 
         public Country GetCountryOfAnAuthor(int authorId)
         {
-            throw new NotImplementedException();
+            // First choose the author with authorId then select the country in auther chosen.
+            return _countryContext.Authors.Where(a => a.Id == authorId).Select(c => c.Country).FirstOrDefault();
         }
     }
 }
