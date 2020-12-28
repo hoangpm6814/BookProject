@@ -49,5 +49,18 @@ namespace BookProject
                 });
             });
         }
+
+        ////Init the database
+        //public void Configure(IApplicationBuilder app, IWebHostEnvironment env, BookDbContext context)
+        //{
+        //    if (env.IsDevelopment())
+        //    {
+        //        app.UseDeveloperExceptionPage();
+        //    }
+
+        //    context.SeedDataContext();
+
+        //    app.UseRouting();
+        //}
     }
 }
