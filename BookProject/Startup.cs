@@ -31,6 +31,7 @@ namespace BookProject
             services.AddDbContext<BookDbContext>(c => c.UseSqlServer(connectionString)); // connection
 
             services.AddScoped<ICountryRepository, CountryRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
