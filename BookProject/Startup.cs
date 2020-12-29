@@ -27,6 +27,8 @@ namespace BookProject
         {
             services.AddMvc();
 
+            //services.AddControllers(); // Leave this one still works
+
             var connectionString = Configuration["ConnectionStrings:bookDbConnectionString"];
             services.AddDbContext<BookDbContext>(c => c.UseSqlServer(connectionString)); // connection
 
@@ -44,12 +46,19 @@ namespace BookProject
 
             app.UseRouting();
 
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapGet("/", async context =>
+            //    {
+            //        await context.Response.WriteAsync("Hello World!");
+            //    });
+            //});
+
+            //app.UseAuthorization(); // Leave this one still works
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
+                endpoints.MapControllers();
             });
         }
     }
