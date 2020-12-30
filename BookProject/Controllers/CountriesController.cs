@@ -13,10 +13,12 @@ namespace BookProject.Controllers
     public class CountriesController : Controller
     {
         private ICountryRepository _countryRepository;
+        private IAuthorRepository _authorRepository;
 
-        public CountriesController(ICountryRepository countryRepository)
+        public CountriesController(ICountryRepository countryRepository, IAuthorRepository authorRepository)
         {
             _countryRepository = countryRepository;
+            _authorRepository = authorRepository;
         }
 
         //api/countries
@@ -65,6 +67,8 @@ namespace BookProject.Controllers
         public IActionResult GetCountryOfAnAuthor(int authorId)
         {
             // Check author with Id exists
+            if (!_authorRepository.AuthorExists(authorId))
+                return NotFound();
 
             var country = _countryRepository.GetCountryOfAnAuthor(authorId);
 
@@ -79,6 +83,32 @@ namespace BookProject.Controllers
             return Ok(countryDTO);
         }
 
-        // Lack GetAuthorsFromACountry
+        //api/countries/countryId/authors
+        [HttpGet("{countryId}/authors")] 
+        public IActionResult GetAuthorsFromACountry(int countryId)
+        {
+            // Check country with Id exists
+            if (!_countryRepository.CountryExists(countryId))
+                return NotFound(); 
+
+            var authors = _countryRepository.GetAuthorsFromACountry(countryId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var authorsDTO = new List<AuthorDTO>();
+
+            foreach(var author in authors)
+            {
+                authorsDTO.Add(new AuthorDTO()
+                {
+                    Id = author.Id,
+                    FirstName = author.FirstName,
+                    LastName = author.LastName
+                });
+            }
+
+            return Ok(authorsDTO);
+        }
     }
 }

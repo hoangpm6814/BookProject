@@ -8,29 +8,36 @@ namespace BookProject.Services
 {
     public class AuthorRepository : IAuthorRepository
     {
+        private BookDbContext _authorContext;
+
+        public AuthorRepository(BookDbContext authorContext)
+        {
+            _authorContext = authorContext;
+        }
+
         public bool AuthorExists(int authorId)
         {
-            throw new NotImplementedException();
+            return _authorContext.Authors.Any(a => a.Id == authorId);
         }
 
         public Author GetAuthor(int authorId)
         {
-            throw new NotImplementedException();
+            return _authorContext.Authors.Where(a => a.Id == authorId).FirstOrDefault();
         }
 
         public ICollection<Author> GetAuthors()
         {
-            throw new NotImplementedException();
+            return _authorContext.Authors.OrderBy(a => a.FirstName).ToList();
         }
 
         public ICollection<Author> GetAuthorsOfABook(int bookId)
         {
-            throw new NotImplementedException();
+            return _authorContext.BookAuthors.Where(ba => ba.BookId == bookId).Select(ba => ba.Author).ToList();
         }
 
         public ICollection<Book> GetBooksByAuthor(int authorId)
         {
-            throw new NotImplementedException();
+            return _authorContext.BookAuthors.Where(ba => ba.AuthorId == authorId).Select(ba => ba.Book).ToList();
         }
     }
 }
