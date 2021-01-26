@@ -40,5 +40,12 @@ namespace BookProject.Services
             // First choose the author with authorId then select the country in auther chosen.
             return _countryContext.Authors.Where(a => a.Id == authorId).Select(c => c.Country).FirstOrDefault();
         }
+
+        public bool IsDuplicateCountryName(int countryId, string countryName)
+        {
+            var country = _countryContext.Countries.Where(c => c.Name.ToUpper() == countryName.ToUpper() && c.Id == countryId).FirstOrDefault();
+
+            return country == null ? false : true;
+        }
     }
 }

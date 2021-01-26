@@ -13,6 +13,6 @@ namespace BookProject.Services
         ICollection<Category> GetCategoriesOfABook(int bookId);
         ICollection<Book> GetBooksForCategory(int categoryId);
         bool CategoryExists(int categoryId);
-
+        bool IsDuplicateCategoryName(int categoryId, string categoryName);
     }
 }

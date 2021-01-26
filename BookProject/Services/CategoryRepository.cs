@@ -49,5 +49,12 @@ namespace BookProject.Services
         {
             return _categoryContext.Categories.Where(c => c.Id == categoryId).FirstOrDefault();
         }
+
+        public bool IsDuplicateCategoryName(int categoryId, string categoryName)
+        {
+            var category = _categoryContext.Categories.Where(c => c.Name.ToUpper() == categoryName.ToUpper() && c.Id == categoryId).FirstOrDefault();
+
+            return category == null ? false : true;
+        }
     }
 }

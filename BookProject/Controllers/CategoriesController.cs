@@ -13,10 +13,12 @@ namespace BookProject.Controllers
     public class CategoriesController : Controller
     {
         private ICategoryRepository _categoryRepository;
+        private IBookRepository _bookRepository;
 
-        public CategoriesController(ICategoryRepository categoryRepository)
+        public CategoriesController(ICategoryRepository categoryRepository, IBookRepository bookRepository)
         {
             _categoryRepository = categoryRepository;
+            _bookRepository = bookRepository;
         }
 
         //api/categories
@@ -65,6 +67,8 @@ namespace BookProject.Controllers
         public IActionResult GetCategoryOfABook(int bookId)
         {
             // Check book with Id exists
+            if (!_bookRepository.BookExists(bookId))
+                return NotFound();
 
             var categories = _categoryRepository.GetCategoriesOfABook(bookId);
 
@@ -84,6 +88,32 @@ namespace BookProject.Controllers
             return Ok(categoriesDTO);
         }
 
-        // Lack GetBooksForCategory
+        //api/categories/categoryId/books
+        [HttpGet("{categoryId}/books")]
+        public IActionResult GetBooksForCategory(int categoryId)
+        {
+            // Check cate with Id exists
+            if (!_categoryRepository.CategoryExists(categoryId))
+                return NotFound();
+
+            var books = _categoryRepository.GetBooksForCategory(categoryId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var booksDTO = new List<BookDTO>();
+            foreach (var book in books)
+            {
+                booksDTO.Add(new BookDTO
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    Isbn = book.Isbn,
+                    DatePublished = book.DatePublished
+                });
+            }
+
+            return Ok(booksDTO);
+        }
     }
 }
