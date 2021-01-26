@@ -1,4 +1,5 @@
 ﻿using BookProject.DTOs;
+using BookProject.Models;
 using BookProject.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -43,7 +44,7 @@ namespace BookProject.Controllers
         }
 
         //api/countries/countryId
-        [HttpGet("{countryId}")]
+        [HttpGet("{countryId}", Name = "GetCountry")]
         public IActionResult GetCountry(int countryId)
         {
             if (!_countryRepository.CountryExists(countryId))
@@ -109,6 +110,92 @@ namespace BookProject.Controllers
             }
 
             return Ok(authorsDTO);
+        }
+
+        //api/countries
+        [HttpPost]
+        public IActionResult CreateCountry([FromBody]Country countryNeedToCreate)
+        {
+            if (countryNeedToCreate == null)
+                return BadRequest(ModelState);
+
+            // Check whether country's name exists in DB or not. 
+            // Should be done in Repo, not here.
+            var country = _countryRepository.GetCountries()
+                .Where(c => c.Name.Trim().ToUpper() == countryNeedToCreate.Name.Trim().ToUpper())
+                .FirstOrDefault();
+
+            if (country != null)
+            {
+                ModelState.AddModelError("", $"Country {countryNeedToCreate.Name} already exists.");
+                return StatusCode(442, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_countryRepository.CreateCountry(countryNeedToCreate))
+            {
+                ModelState.AddModelError("", $"Something went wrong creating {countryNeedToCreate.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return CreatedAtRoute("GetCountry", new { countryId = countryNeedToCreate.Id }, countryNeedToCreate);
+        }
+
+        //api/countries/countryId
+        [HttpPut("{countryId}")]
+        public IActionResult UpdateCountry(int countryId, [FromBody] Country countryNeedToUpdate)
+        {
+            if (countryNeedToUpdate == null)
+                return BadRequest(ModelState);
+
+            if (countryNeedToUpdate.Id != countryId)
+                return BadRequest(ModelState);
+
+            if (_countryRepository.IsDuplicateCountryName(countryId, countryNeedToUpdate.Name))
+            {
+                ModelState.AddModelError("", $"Country {countryNeedToUpdate.Name} already exists.");
+                return StatusCode(442, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_countryRepository.UpdateCountry(countryNeedToUpdate))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating {countryNeedToUpdate.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
+
+        //api/countries/countryId
+        [HttpDelete("{countryId}")]
+        public IActionResult DeleteCountry(int countryId)
+        {
+            if (!_countryRepository.CountryExists(countryId))
+                return NotFound();
+
+            var countryToDelete = _countryRepository.GetCountry(countryId);
+
+            if (_countryRepository.GetAuthorsFromACountry(countryId).Count() > 0)
+            {
+                ModelState.AddModelError("", $"{countryToDelete.Name} cannot be deleted because it is used by at least one author.");
+                return StatusCode(409, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_countryRepository.DeleteCountry(countryToDelete))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting {countryToDelete.Name}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
         }
     }
 }
