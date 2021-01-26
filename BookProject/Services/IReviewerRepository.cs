@@ -13,5 +13,10 @@ namespace BookProject.Services
         ICollection<Review> GetReviewsByReviewer(int reviewerId);
         Reviewer GetReviewerOfAReview(int reviewId);
         bool ReviewerExists(int reviewerId);
+
+        bool CreateReviewer(Reviewer reviewer);
+        bool DeleteReviewer(Reviewer reviewer);
+        bool UpdateReviewer(Reviewer reviewer);
+        bool Save();
     }
 }

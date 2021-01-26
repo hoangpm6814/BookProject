@@ -16,6 +16,7 @@ namespace BookProject.Services
 
         bool CreateReview(Review review);
         bool DeleteReview(Review review);
+        bool DeleteReviews(List<Review> reviews);
         bool UpdateReview(Review review);
         bool Save();
     }

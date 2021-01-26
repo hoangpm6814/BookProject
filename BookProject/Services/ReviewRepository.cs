@@ -65,5 +65,11 @@ namespace BookProject.Services
             _reviewContext.Remove(review);
             return Save();
         }
+
+        public bool DeleteReviews(List<Review> reviews)
+        {
+            _reviewContext.RemoveRange(reviews);
+            return Save();
+        }
     }
 }
