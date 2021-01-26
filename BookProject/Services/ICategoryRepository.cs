@@ -14,5 +14,10 @@ namespace BookProject.Services
         ICollection<Book> GetBooksForCategory(int categoryId);
         bool CategoryExists(int categoryId);
         bool IsDuplicateCategoryName(int categoryId, string categoryName);
+
+        bool CreateCategory(Category category);
+        bool DeleteCategory(Category category);
+        bool UpdateCategory(Category category);
+        bool Save();
     }
 }
