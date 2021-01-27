@@ -15,5 +15,10 @@ namespace BookProject.Services
         bool BookExists(int bookId);
         bool BookExists(string bookIsbn);
         bool IsDuplicateIsbn(int bookId, string bookIsbn);
+
+        bool CreateBook(List<int> authorsId, List<int> categoriesId, Book Book);
+        bool DeleteBook(Book Book);
+        bool UpdateBook(List<int> authorsId, List<int> categoriesId, Book Book);
+        bool Save();
     }
 }
