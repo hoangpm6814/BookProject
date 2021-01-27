@@ -47,5 +47,29 @@ namespace BookProject.Services
 
             return country == null ? false : true;
         }
+
+        public bool Save()
+        {
+            var saved = _countryContext.SaveChanges(); // Save, update, delete hasn't been executed in DB until this method's called
+            return saved >= 0 ? true : false; // If saved > 0: something has changed, 0: nothing's changed, <0: something wrong happenned
+        }
+
+        public bool UpdateCountry(Country country)
+        {
+            _countryContext.Update(country);
+            return Save();
+        }
+
+        public bool CreateCountry(Country country)
+        {
+            _countryContext.Add(country);
+            return Save();
+        }
+
+        public bool DeleteCountry(Country country)
+        {
+            _countryContext.Remove(country);
+            return Save();
+        }
     }
 }

@@ -13,5 +13,10 @@ namespace BookProject.Services
         ICollection<Author> GetAuthorsOfABook(int bookId);
         ICollection<Book> GetBooksByAuthor(int authorId);
         bool AuthorExists(int authorId);
+
+        bool CreateAuthor(Author author);
+        bool DeleteAuthor(Author author);
+        bool UpdateAuthor(Author author);
+        bool Save();
     }
 }

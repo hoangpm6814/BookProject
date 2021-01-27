@@ -1,4 +1,5 @@
 ﻿using BookProject.DTOs;
+using BookProject.Models;
 using BookProject.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -44,7 +45,7 @@ namespace BookProject.Controllers
         }
 
         //api/authors/authorId
-        [HttpGet("{authorId}")]
+        [HttpGet("{authorId}", Name = "GetAuthor")]
         public IActionResult GetAuthor(int authorId)
         {
             if (!_authorRepository.AuthorExists(authorId))
@@ -115,6 +116,88 @@ namespace BookProject.Controllers
                 });
             }
             return Ok(booksDTO);
+        }
+
+        //api/countries
+        [HttpPost]
+        public IActionResult CreateAuthor([FromBody] Author authorNeedToCreate)
+        {
+            if (authorNeedToCreate == null)
+                return BadRequest(ModelState);
+
+            // Check whether Author's name exists in DB or not. 
+            // Should be done in Repo, not here.
+            var Author = _authorRepository.GetAuthors()
+                .Where(c => c.FirstName.Trim().ToUpper() == authorNeedToCreate.FirstName.Trim().ToUpper()
+                && c.LastName.Trim().ToUpper() == authorNeedToCreate.LastName.Trim().ToUpper())
+                .FirstOrDefault();
+
+            if (Author != null)
+            {
+                ModelState.AddModelError("", $"Author {authorNeedToCreate.FirstName} {authorNeedToCreate.LastName} already exists.");
+                return StatusCode(442, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_authorRepository.CreateAuthor(authorNeedToCreate))
+            {
+                ModelState.AddModelError("", $"Something went wrong creating {authorNeedToCreate.FirstName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return CreatedAtRoute("GetAuthor", new { authorId = authorNeedToCreate.Id }, authorNeedToCreate);
+        }
+
+        //api/countries/authorId
+        [HttpPut("{authorId}")]
+        public IActionResult UpdateAuthor(int authorId, [FromBody] Author authorNeedToUpdate)
+        {
+            if (authorNeedToUpdate == null)
+                return BadRequest(ModelState);
+
+            if (authorNeedToUpdate.Id != authorId)
+                return BadRequest(ModelState);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_authorRepository.UpdateAuthor(authorNeedToUpdate))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating {authorNeedToUpdate.FirstName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
+
+        //api/countries/authorId
+        [HttpDelete("{authorId}")]
+        public IActionResult DeleteAuthor(int authorId)
+        {
+            if (!_authorRepository.AuthorExists(authorId))
+                return NotFound();
+
+            var AuthorToDelete = _authorRepository.GetAuthor(authorId);
+
+            if (_authorRepository.GetBooksByAuthor(authorId).Count() > 0)
+            {
+                ModelState.AddModelError("", $"{AuthorToDelete.FirstName} {AuthorToDelete.LastName}" +
+                    $"cannot be deleted because it is used by at least one author.");
+                return StatusCode(409, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_authorRepository.DeleteAuthor(AuthorToDelete))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting {AuthorToDelete.FirstName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
         }
     }
 }

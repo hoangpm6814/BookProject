@@ -1,4 +1,5 @@
 ﻿using BookProject.DTOs;
+using BookProject.Models;
 using BookProject.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -44,7 +45,7 @@ namespace BookProject.Controllers
         }
 
         //api/reviewers/reviewerId
-        [HttpGet("{reviewerId}")]
+        [HttpGet("{reviewerId}", Name = "GetReviewer")]
         public IActionResult GetReviewer(int reviewerId)
         {
             if (!_reviewerRepository.ReviewerExists(reviewerId))
@@ -111,6 +112,76 @@ namespace BookProject.Controllers
                 Lastname = reviewer.LastName
             };
             return Ok(ReviewerDTO);
+        }
+
+        //api/reviewers
+        [HttpPost]
+        public IActionResult CreateReviewer([FromBody] Reviewer reviewerNeedToCreate)
+        {
+            if (reviewerNeedToCreate == null)
+                return BadRequest(ModelState);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_reviewerRepository.CreateReviewer(reviewerNeedToCreate))
+            {
+                ModelState.AddModelError("", $"Something went wrong creating {reviewerNeedToCreate.FirstName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return CreatedAtRoute("GetReviewer", new { reviewerId = reviewerNeedToCreate.Id }, reviewerNeedToCreate);
+        }
+
+        //api/countries/reviewerId
+        [HttpPut("{reviewerId}")]
+        public IActionResult UpdateReviewer(int reviewerId, [FromBody] Reviewer reviewerNeedToUpdate)
+        {
+            if (reviewerNeedToUpdate == null)
+                return BadRequest(ModelState);
+
+            if (reviewerNeedToUpdate.Id != reviewerId)
+                return BadRequest(ModelState);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_reviewerRepository.UpdateReviewer(reviewerNeedToUpdate))
+            {
+                ModelState.AddModelError("", $"Something went wrong updating {reviewerNeedToUpdate.FirstName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
+        }
+
+        //api/countries/reviewerId
+        [HttpDelete("{reviewerId}")]
+        public IActionResult DeleteReviewer(int reviewerId)
+        {
+            if (!_reviewerRepository.ReviewerExists(reviewerId))
+                return NotFound();
+
+            var ReviewerToDelete = _reviewerRepository.GetReviewer(reviewerId);
+            var ReviewsToDelete = _reviewerRepository.GetReviewsByReviewer(reviewerId);
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!_reviewerRepository.DeleteReviewer(ReviewerToDelete))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting {ReviewerToDelete.FirstName}");
+                return StatusCode(500, ModelState);
+            }
+
+            // Delete all reviews of a reviewers
+            if (!_reviewRepository.DeleteReviews(ReviewsToDelete.ToList()))
+            {
+                ModelState.AddModelError("", $"Something went wrong deleting reviews by {ReviewerToDelete.FirstName}");
+                return StatusCode(500, ModelState);
+            }
+
+            return NoContent();
         }
     }
 }

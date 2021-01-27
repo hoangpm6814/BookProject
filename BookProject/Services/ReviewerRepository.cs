@@ -41,5 +41,29 @@ namespace BookProject.Services
         {
             return _reviewerContext.Reviewers.Any(r => r.Id == reviewerId);
         }
+
+        public bool Save()
+        {
+            var saved = _reviewerContext.SaveChanges(); // Save, update, delete hasn't been executed in DB until this method's called
+            return saved >= 0 ? true : false; // If saved > 0: something has changed, 0: nothing's changed, <0: something wrong happenned
+        }
+
+        public bool UpdateReviewer(Reviewer reviewer)
+        {
+            _reviewerContext.Update(reviewer);
+            return Save();
+        }
+
+        public bool CreateReviewer(Reviewer reviewer)
+        {
+            _reviewerContext.Add(reviewer);
+            return Save();
+        }
+
+        public bool DeleteReviewer(Reviewer reviewer)
+        {
+            _reviewerContext.Remove(reviewer);
+            return Save();
+        }
     }
 }

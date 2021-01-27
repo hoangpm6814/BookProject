@@ -39,5 +39,29 @@ namespace BookProject.Services
         {
             return _authorContext.BookAuthors.Where(ba => ba.AuthorId == authorId).Select(ba => ba.Book).ToList();
         }
+
+        public bool Save()
+        {
+            var saved = _authorContext.SaveChanges(); // Save, update, delete hasn't been executed in DB until this method's called
+            return saved >= 0 ? true : false; // If saved > 0: something has changed, 0: nothing's changed, <0: something wrong happenned
+        }
+
+        public bool UpdateAuthor(Author author)
+        {
+            _authorContext.Update(author);
+            return Save();
+        }
+
+        public bool CreateAuthor(Author author)
+        {
+            _authorContext.Add(author);
+            return Save();
+        }
+
+        public bool DeleteAuthor(Author author)
+        {
+            _authorContext.Remove(author);
+            return Save();
+        }
     }
 }
