@@ -193,7 +193,7 @@ namespace BookProject.Controllers
 
             if (!_authorRepository.DeleteAuthor(AuthorToDelete))
             {
-                ModelState.AddModelError("", $"Something went wrong deleting {AuthorToDelete.Name}");
+                ModelState.AddModelError("", $"Something went wrong deleting {AuthorToDelete.FirstName}");
                 return StatusCode(500, ModelState);
             }
 
